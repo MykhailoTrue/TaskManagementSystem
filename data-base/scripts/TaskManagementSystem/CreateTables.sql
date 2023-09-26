@@ -71,10 +71,11 @@ IF OBJECT_ID(N'ProjectMembers', N'U') IS NOT NULL
 	DROP TABLE ProjectMembers
 CREATE TABLE ProjectMembers
 (
+	Id INT IDENTITY(1,1),
 	ProjectId INT NOT NULL,
 	MemberId INT NOT NULL,
 
-	CONSTRAINT PK_ProjectMembers PRIMARY KEY(ProjectId, MemberId),
+	CONSTRAINT PK_ProjectMembers PRIMARY KEY(Id),
 	CONSTRAINT FK_ProjectMembers_To_Projects FOREIGN KEY (ProjectId) REFERENCES Projects (Id)
 		ON DELETE CASCADE,
 	CONSTRAINT FK_ProjectMembers_To_Users_MemberId FOREIGN KEY (MemberId) REFERENCES Users (Id)
