@@ -1,6 +1,6 @@
-﻿using TaskManagementSystem.Ado.Dall.Entities.Abstract;
+﻿using TMS.Dapper.DAL.Entities.Abstract;
 
-namespace TaskManagementSystem.Ado.Dall.Entities
+namespace TMS.Dapper.DAL.Entities
 {
     public class User : BaseEntity
     {

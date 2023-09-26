@@ -1,4 +1,4 @@
-﻿namespace TaskManagementSystem.Ado.Dall.Entities.Abstract
+﻿namespace TMS.Dapper.DAL.Entities.Abstract
 {
     public class BaseEntity
     {
