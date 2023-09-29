@@ -1,4 +1,5 @@
-﻿using TMS.Dapper.DAL.Entities.Abstract;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using TMS.Dapper.DAL.Entities.Abstract;
 
 namespace TMS.Dapper.DAL.Entities
 {
@@ -7,6 +8,7 @@ namespace TMS.Dapper.DAL.Entities
         public string Name { get; set; }
         public string? Description { get; set; }
 
+        [NotMapped]
         public Workspace? Workspace { get; set; }
         public int WorkspaceId { get; set; }
     }

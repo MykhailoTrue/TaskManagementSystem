@@ -1,4 +1,5 @@
-﻿using TMS.Dapper.DAL.Entities.Abstract;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using TMS.Dapper.DAL.Entities.Abstract;
 
 namespace TMS.Dapper.DAL.Entities
 {
@@ -6,9 +7,10 @@ namespace TMS.Dapper.DAL.Entities
     {
         public string Name { get; set; }
         public string? Description { get; set; }
-        
+
+        [NotMapped]
         public User? Author { get; set; }
-        public int AutherId { get; set; }
+        public int AuthorId { get; set; }
 
     }
 }
