@@ -11,5 +11,8 @@ namespace TMS.Dapper.DAL.Entities
         public string Email { get; set; }
         public DateTime BirthDate { get; set; }
 
+        [NotMapped]
+        public IEnumerable<Workspace> Workspaces { get; set; }
+
     }
 }
