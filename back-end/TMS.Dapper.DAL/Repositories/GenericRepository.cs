@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
 using System.Text;
+using TMS.Dapper.DAL.Context;
 using TMS.Dapper.DAL.Entities.Abstract;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
@@ -10,12 +11,12 @@ namespace TMS.Dapper.DAL.Repositories
 {
     public abstract class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
-        private readonly IDbConnection _connection;
-        private readonly string _tableName;
+        protected readonly DapperContext _context;
+        protected readonly string _tableName;
 
-        public GenericRepository(IDbConnection connection, string? tableName = null)
+        public GenericRepository(DapperContext context, string? tableName = null)
         {
-            _connection = connection;
+            this._context = context;
             if (tableName is not null)
             {
                 _tableName = tableName;
@@ -28,63 +29,82 @@ namespace TMS.Dapper.DAL.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            var entities = await _connection.QueryAsync<T>($"SELECT * FROM dbo.[{_tableName}]");
-            return entities;
+            var query = $"SELECT * FROM dbo.[{_tableName}]";
+
+            using (var connection = _context.CreateConnection())
+            {
+                var entities = await connection.QueryAsync<T>(query);
+                return entities;
+            }
         }
 
         public async Task<T> GetByIdAsync(int id)
         {
-            var sql = $"SELECT * FROM dbo.[{_tableName}] " +
+            var query = $"SELECT * FROM dbo.[{_tableName}] " +
                 "WHERE Id = @Id";
-            var entity = await _connection.QuerySingleOrDefaultAsync<T>(sql,
-                new 
-                { 
-                    @Id = id,
-                });
-            return entity;
+
+            using (var connection = _context.CreateConnection())
+            {
+                var entity = await connection.QuerySingleOrDefaultAsync<T>(query,
+                    new 
+                    {
+                        @Id = id,
+                    });
+                return entity;
+            }
         }
 
         public async Task<int> CreateAsync(T entity)
         {
-            var sql = GenerateInsertQuery();
+            var query = GenerateInsertQuery();
 
-            var entityId = await _connection.ExecuteScalarAsync<int>(sql,
-                param: entity);
+            using (var connection = _context.CreateConnection())
+            {
+                var entityId = await connection.ExecuteScalarAsync<int>(query,
+                    param: entity);
 
-            return entityId;
+                return entityId;
+            }
         }
 
         public async Task<int> CreateRangeAsync(IEnumerable<T> entities)
         {
-            var sql = GenerateInsertQuery();
-            var insertedRows = await _connection.ExecuteAsync(sql,
+            var query = GenerateInsertQuery();
+
+            using (var connection = _context.CreateConnection())
+            {
+                var insertedRows = await connection.ExecuteAsync(query,
                 param: entities);
 
-            return insertedRows;
+                return insertedRows;
+            }
         }
 
         public async Task UpdateAsync(T entity)
         {
-            var sql = GenerateUpdateQuery();
-            await _connection.ExecuteAsync(sql,
+            var query = GenerateUpdateQuery();
+
+            using (var connection = _context.CreateConnection())
+            {
+                await connection.ExecuteAsync(query,
                 param: entity);
+            }
         }
 
         public async Task<int> DeleteAsync(int id)
         {
-            var sql = $"DELETE FROM dbo.[{_tableName}] Where Id=@Id";
-            var rowsAffected = await _connection.ExecuteAsync(sql,
-                param : new 
-                { 
-                    @Id = id 
+            var query = $"DELETE FROM dbo.[{_tableName}] Where Id=@Id";
+
+            using (var connection = _context.CreateConnection())
+            {
+                var rowsAffected = await connection.ExecuteAsync(query,
+                param: new
+                {
+                    @Id = id
                 });
 
-            return rowsAffected;
-        }
-
-        public void Dispose()
-        {
-            _connection.Dispose();
+                return rowsAffected;
+            }
         }
 
         private string GenerateUpdateQuery()
