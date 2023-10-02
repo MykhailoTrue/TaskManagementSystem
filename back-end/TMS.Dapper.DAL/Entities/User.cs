@@ -9,10 +9,10 @@ namespace TMS.Dapper.DAL.Entities
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         [NotMapped]
-        public IEnumerable<Workspace> Workspaces { get; set; }
+        public List<Workspace> Workspaces { get; set; } = new List<Workspace>();
 
     }
 }

@@ -12,12 +12,11 @@ namespace TMS.Dapper.DAL.Entities
         public int WorkspaceId { get; set; }
 
         [NotMapped]
-        public User? ProjectLead { get; set; }
-        public int? ProjectLeadId { get; set; }
-
-        [NotMapped]
         public ProjectCategory? ProjectCategory { get; set; }
         public int? ProjectCategoryId { get; set; }
+
+        [NotMapped]
+        public List<User> Members { get; set; } = new List<User> ();
 
     }
 }

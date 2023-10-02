@@ -12,5 +12,8 @@ namespace TMS.Dapper.DAL.Entities
         public User? Author { get; set; }
         public int AuthorId { get; set; }
 
+        [NotMapped]
+        public List<Project> Projects { get; set; } = new List<Project>();
+
     }
 }
