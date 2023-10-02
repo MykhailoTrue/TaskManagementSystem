@@ -54,12 +54,12 @@ CREATE TABLE Projects
 	Id INT IDENTITY(1,1),
 	[Name] NVARCHAR(max) NOT NULL,
 	WorkspaceId INT NOT NULL,
-	ProjectCategory INT NULL,
+	ProjectCategoryId INT NULL,
 
 	CONSTRAINT PK_Project_Id PRIMARY KEY (Id),
 	CONSTRAINT FK_Projects_To_Workspaces FOREIGN KEY (WorkspaceId) REFERENCES Workspaces (Id)
 		ON DELETE CASCADE,
-	CONSTRAINT FK_Projects_To_Categories FOREIGN KEY (ProjectCategory) REFERENCES ProjectCategories (Id)
+	CONSTRAINT FK_Projects_To_Categories FOREIGN KEY (ProjectCategoryId) REFERENCES ProjectCategories (Id)
 		ON DELETE NO ACTION,
 );
 
