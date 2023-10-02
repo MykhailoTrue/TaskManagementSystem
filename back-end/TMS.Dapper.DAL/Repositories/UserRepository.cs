@@ -14,25 +14,6 @@ namespace TMS.Dapper.DAL.Repositories
             
         }
 
-        public async Task<IEnumerable<Workspace>> GetUsersWithWorkspaces()
-        {
-            var query = @"SELECT u.Id, u.FirstName, u.LastName, u.Email, u.BirthDate, w.Id, w.Title, w.Description, w.CreatedAt, w.UpdatedAt, w.AuthorId
-                        FROM Users u
-                        INNER JOIN Workspaces w ON u.Id = w.AuthorId;";
-
-            using (var connection = _context.CreateConnection())
-            {
-                var users = await connection.QueryAsync<Workspace, User, Workspace>(query,
-                    (w, u) =>
-                    {
-                        w.Author = u;
-                        return w;
-                    },
-                    splitOn: "AuthorId");
-                return users;
-            }
-        }
-
         public async Task<User> GetUserWithWorkspacesMultipleQueryAsync(int userId)
         {
             var query = "SELECT * FROM dbo.[Users] WHERE Id=@Id; " +
@@ -44,30 +25,53 @@ namespace TMS.Dapper.DAL.Repositories
                 var user = await multi.ReadSingleOrDefaultAsync<User>(); 
                 if (user is not null)
                 {
-                    user.Workspaces = await multi.ReadAsync<Workspace>();
+                    user.Workspaces = (await multi.ReadAsync<Workspace>()).ToList();
                 }
 
                 return user;
             }
         }
 
-        public async Task<IEnumerable<User>> GetUserWithWorkspacesMultipleMappingAsync()
+        public async Task<IEnumerable<User>> GetUsersWithProjectsAsync()
         {
-            var query = "SELECT * from dbo.[Users] as u " +
-                "INNER JOIN dbo.[Workspaces] as w ON u.Id = w.AuthorId";
+            var query = @"SELECT * FROM dbo.[Users] u 
+                            INNER JOIN dbo.[Workspaces] w ON u.Id = w.AuthorId 
+                            INNER JOIN dbo.[Projects] p ON p.WorkspaceId = w.Id 
+                            LEFT JOIN dbo.[ProjectCategories] pc ON p.ProjectCategoryId = pc.Id ";
 
             using (var connection = _context.CreateConnection())
             {
-                var userDict = new Dictionary<int, User>();
-                var users = await connection.QueryAsync<User, Workspace, User>(
-                    query, (u, w) =>
+                Dictionary<int, User> userDict = new();
+                Dictionary<int, Workspace> workspaceDict = new();
+                var users = await connection.QueryAsync<User, Workspace, Project, ProjectCategory, User>(
+                    query, (u, w, p, c) =>
                     {
-                        return u;
-                    });
+                        if (!userDict.TryGetValue(u.Id, out var currentUser))
+                        {
+                            currentUser = u;
+                            userDict[u.Id] = currentUser;
+                        }
 
-                return users;
+                        if (!workspaceDict.TryGetValue(w.Id, out var currentWorkspace))
+                        {
+                            currentWorkspace = w;
+                            currentWorkspace.Author = currentUser;
 
-                var userss = await connection.QueryAsync(,)
+                            workspaceDict[w.Id] = currentWorkspace;
+
+                            currentUser.Workspaces.Add(currentWorkspace);
+                        }
+
+                        p.ProjectCategory = c;
+                        p.Workspace = currentWorkspace;
+
+                        currentWorkspace.Projects.Add(p);
+
+                        return currentUser;
+                    },
+                    splitOn: "Id");
+
+                return users.Distinct().ToList();
             }
         }
     }
