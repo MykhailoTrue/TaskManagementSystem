@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
 using System.Text;
-using TMS.Dapper.DAL.Context;
 using TMS.Dapper.DAL.Entities.Abstract;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
@@ -11,19 +10,25 @@ namespace TMS.Dapper.DAL.Repositories
 {
     public abstract class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
-        protected readonly DapperContext _context;
         protected readonly string _tableName;
+        protected readonly IDbConnection _connection;
+        protected readonly IDbTransaction _transaction;
 
-        public GenericRepository(DapperContext context, string? tableName = null)
+        public GenericRepository(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            string tableName)
         {
-            this._context = context;
+            _connection = connection;
+            _transaction = transaction;
+
             if (tableName is not null)
             {
                 _tableName = tableName;
             }
             else
             {
-                _tableName = GetTableName();
+                _tableName = GenericRepository<T>.GetTableName();
             }
         }
 
@@ -31,11 +36,11 @@ namespace TMS.Dapper.DAL.Repositories
         {
             var query = $"SELECT * FROM dbo.[{_tableName}]";
 
-            using (var connection = _context.CreateConnection())
-            {
-                var entities = await connection.QueryAsync<T>(query);
-                return entities;
-            }
+            var entities = await _connection.QueryAsync<T>(
+                    query,
+                    transaction: _transaction);
+
+            return entities;
         }
 
         public async Task<T> GetByIdAsync(int id)
@@ -43,68 +48,60 @@ namespace TMS.Dapper.DAL.Repositories
             var query = $"SELECT * FROM dbo.[{_tableName}] " +
                 "WHERE Id = @Id";
 
-            using (var connection = _context.CreateConnection())
-            {
-                var entity = await connection.QuerySingleOrDefaultAsync<T>(query,
-                    new 
+            var entity = await _connection.QuerySingleOrDefaultAsync<T>(
+                    query,
+                    param: new
                     {
                         @Id = id,
-                    });
-                return entity;
-            }
+                    },
+                    transaction: _transaction);
+            return entity;
         }
 
         public async Task<int> CreateAsync(T entity)
         {
             var query = GenerateInsertQuery();
 
-            using (var connection = _context.CreateConnection())
-            {
-                var entityId = await connection.ExecuteScalarAsync<int>(query,
-                    param: entity);
+            var entityId = await _connection.ExecuteScalarAsync<int>(query,
+                    param: entity,
+                    transaction: _transaction);
 
-                return entityId;
-            }
+            return entityId;
+
         }
 
         public async Task<int> CreateRangeAsync(IEnumerable<T> entities)
         {
             var query = GenerateInsertQuery();
 
-            using (var connection = _context.CreateConnection())
-            {
-                var insertedRows = await connection.ExecuteAsync(query,
-                param: entities);
+            var insertedRows = await _connection.ExecuteAsync(query,
+                param: entities,
+                transaction: _transaction);
 
-                return insertedRows;
-            }
+            return insertedRows;
         }
 
         public async Task UpdateAsync(T entity)
         {
             var query = GenerateUpdateQuery();
 
-            using (var connection = _context.CreateConnection())
-            {
-                await connection.ExecuteAsync(query,
-                param: entity);
-            }
+            await _connection.ExecuteAsync(query,
+                param: entity,
+                transaction: _transaction);
         }
 
         public async Task<int> DeleteAsync(int id)
         {
             var query = $"DELETE FROM dbo.[{_tableName}] Where Id=@Id";
 
-            using (var connection = _context.CreateConnection())
-            {
-                var rowsAffected = await connection.ExecuteAsync(query,
+            var rowsAffected = await _connection.ExecuteAsync(query,
                 param: new
                 {
                     @Id = id
-                });
+                },
+                transaction: _transaction);
 
-                return rowsAffected;
-            }
+            return rowsAffected;
         }
 
         private string GenerateUpdateQuery()
@@ -122,7 +119,7 @@ namespace TMS.Dapper.DAL.Repositories
             return updateQuery.ToString();
         }
 
-        private string GetTableName()
+        private static string GetTableName()
         {
             var type = typeof(T);
             var tableAttr = type.GetCustomAttribute<TableAttribute>(true);
@@ -153,7 +150,7 @@ namespace TMS.Dapper.DAL.Repositories
 
             return insertQuery.ToString();
         }
-        private List<string> GetEntityProperties()
+        private static List<string> GetEntityProperties()
         {
             var prop = typeof(T).GetProperties();
             return prop

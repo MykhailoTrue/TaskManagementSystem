@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using TMS.Dapper.DAL.Context;
+using System.Data;
 using TMS.Dapper.DAL.Entities;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
@@ -7,7 +7,8 @@ namespace TMS.Dapper.DAL.Repositories
 {
     public class ProjectRepository : GenericRepository<Project>, IProjectRepository
     {
-        public ProjectRepository(DapperContext context) : base(context, "Projects")
+        public ProjectRepository(IDbConnection connection, IDbTransaction transaction) 
+            : base(connection, transaction, "Projects")
         {
         }
 
@@ -38,25 +39,23 @@ namespace TMS.Dapper.DAL.Repositories
                     WHERE 
                         p.Id = 1;";
 
-            using (var connection = _context.CreateConnection())
-            {
-                Project? project = null;
-                var projects = await connection.QueryAsync<Project, ProjectCategory, User, Project>(
-                    query, (p, pc, u) =>
+            Project? project = null;
+            var projects = await _connection.QueryAsync<Project, ProjectCategory, User, Project>(
+                query, (p, pc, u) =>
+                {
+                    if (project is null)
                     {
-                        if (project is null)
-                        {
-                            project = p;
-                            project.ProjectCategory = pc;
-                        }
-                        project.Members.Add(u);
+                        project = p;
+                        project.ProjectCategory = pc;
+                    }
+                    project.Members.Add(u);
 
-                        return project;
-                    },
-                    param: new {@Id = id});
+                    return project;
+                },
+                param: new { @Id = id },
+                transaction: _transaction);
 
-                return project;
-            }
+            return project;
         }
     }
 }
