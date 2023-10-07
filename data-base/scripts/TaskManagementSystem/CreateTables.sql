@@ -54,15 +54,12 @@ CREATE TABLE Projects
 	Id INT IDENTITY(1,1),
 	[Name] NVARCHAR(max) NOT NULL,
 	WorkspaceId INT NOT NULL,
-	ProjectLeadId INT NULL,
-	ProjectCategory INT NULL,
+	ProjectCategoryId INT NULL,
 
 	CONSTRAINT PK_Project_Id PRIMARY KEY (Id),
 	CONSTRAINT FK_Projects_To_Workspaces FOREIGN KEY (WorkspaceId) REFERENCES Workspaces (Id)
 		ON DELETE CASCADE,
-	CONSTRAINT FK_Projects_To_Users_ProjectLeadId FOREIGN KEY (ProjectLeadId) REFERENCES Users (Id)
-		ON DELETE NO ACTION,
-	CONSTRAINT FK_Projects_To_Categories FOREIGN KEY (ProjectCategory) REFERENCES ProjectCategories (Id)
+	CONSTRAINT FK_Projects_To_Categories FOREIGN KEY (ProjectCategoryId) REFERENCES ProjectCategories (Id)
 		ON DELETE NO ACTION,
 );
 
@@ -71,10 +68,11 @@ IF OBJECT_ID(N'ProjectMembers', N'U') IS NOT NULL
 	DROP TABLE ProjectMembers
 CREATE TABLE ProjectMembers
 (
+	Id INT IDENTITY(1,1),
 	ProjectId INT NOT NULL,
 	MemberId INT NOT NULL,
 
-	CONSTRAINT PK_ProjectMembers PRIMARY KEY(ProjectId, MemberId),
+	CONSTRAINT PK_ProjectMembers PRIMARY KEY(Id),
 	CONSTRAINT FK_ProjectMembers_To_Projects FOREIGN KEY (ProjectId) REFERENCES Projects (Id)
 		ON DELETE CASCADE,
 	CONSTRAINT FK_ProjectMembers_To_Users_MemberId FOREIGN KEY (MemberId) REFERENCES Users (Id)
