@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using TMS.Dapper.Web.Extensions;
 
 namespace TaskManagementSystem.Ado.Web
 {
@@ -21,25 +22,7 @@ namespace TaskManagementSystem.Ado.Web
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
-            services.AddScoped((provider) =>
-            {
-                async Task<SqlConnection> GetDbConnectionAsync()
-                {
-                    var connection = new SqlConnection(_configuration.GetConnectionString("TaskManagementSystem"));
-                    await connection.OpenAsync();
-                    return connection;
-                }
-
-                return GetDbConnectionAsync().Result;
-            });
-
-            services.AddScoped<IDbTransaction>(s =>
-            {
-                SqlConnection conn = s.GetRequiredService<SqlConnection>();
-                return conn.BeginTransaction();
-            }); 
-
-            services.AddScoped<SqlCommand>(s => new SqlCommand("", s.GetRequiredService<SqlConnection>()));
+            services.RegisterUnitOfWork(_configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
