@@ -7,5 +7,7 @@ namespace TMS.Dapper.DAL.Repositories.Interfaces
         Task<User?> GetUserWithWorkspacesMultipleQueryAsync(int userId);
         Task<IEnumerable<User>> GetUsersWithProjectsAsync();
 
+        Task<IEnumerable<User>> GetUsersByEmail(string email);
+
     }
 }

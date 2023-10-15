@@ -6,6 +6,7 @@ using TMS.Dapper.BLL.MappingProfiles;
 using System.Reflection;
 using TMS.Dapper.BLL.Services;
 using TMS.Dapper.BLL.Services.Abstract;
+using TMS.Dapper.Web.Middleware;
 
 namespace TMS.Dapper.Web.Extensions
 {
@@ -47,6 +48,11 @@ namespace TMS.Dapper.Web.Extensions
         public static void RegisterCustomServices(this IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();
+        }
+
+        public static void RegisterMiddlewareFactory(this IServiceCollection services)
+        {
+            services.AddTransient<ExceptionMiddleware>();
         }
     }
 }

@@ -43,7 +43,7 @@ namespace TMS.Dapper.DAL.Repositories
             return entities;
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)
         {
             var query = $"SELECT * FROM dbo.[{_tableName}] " +
                 "WHERE Id = @Id";

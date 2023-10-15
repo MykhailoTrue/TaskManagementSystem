@@ -38,6 +38,7 @@ namespace TaskManagementSystem.Ado.Web
             services.RegisterUnitOfWork(_configuration);
             services.RegisterAutoMapper();
             services.RegisterCustomServices();
+            services.RegisterMiddlewareFactory();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
