@@ -1,8 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using System.Data;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 using TMS.Dapper.DAL.Repositories;
+using TMS.Dapper.BLL.MappingProfiles;
+using System.Reflection;
+using TMS.Dapper.BLL.Services;
+using TMS.Dapper.BLL.Services.Abstract;
 
 namespace TMS.Dapper.Web.Extensions
 {
@@ -27,6 +30,23 @@ namespace TMS.Dapper.Web.Extensions
             services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
             services.AddScoped<IProjectCategoryRepository, ProjectCategoryRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+        }
+
+        public static void RegisterAutoMapper(this IServiceCollection services)
+        {
+            services.AddAutoMapper(cf =>
+            {
+                cf.AddProfile<UserProfile>();
+                cf.AddProfile<WorkspaceProfile>();
+                cf.AddProfile<ProjectCategoryProfile>();
+                cf.AddProfile<ProjectProfile>();
+            }, 
+            Assembly.GetExecutingAssembly());
+        }
+
+        public static void RegisterCustomServices(this IServiceCollection services)
+        {
+            services.AddScoped<IUserService, UserService>();
         }
     }
 }

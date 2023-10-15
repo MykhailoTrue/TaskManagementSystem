@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using TMS.Dapper.BLL.Services.Abstract;
+using TMS.Dapper.Common.DTOs.Users.CRUD;
+using TMS.Dapper.Common.DTOs.Users.Custom;
 using TMS.Dapper.DAL.Entities;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
@@ -8,48 +12,90 @@ namespace TMS.Dapper.Web.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly IUserService _userService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUnitOfWork unitOfWork)
+        public UsersController(IUserService userService, IUnitOfWork unitOfWork, IMapper mapper)
         {
+            _userService = userService;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<User>> GetAll() 
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserReadDto>))]
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAll() 
         {
-            var users = await _unitOfWork.UserRepository.GetAllAsync();
-            _unitOfWork.Commit();
-            return users;
+            return Ok(await _userService.GetAllUsersAsync());
         }
 
         [HttpGet("{id}")]
-        public async Task<User> GetById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReadDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<UserReadDto>> GetById([FromRoute] int id)
         {
-            var user =  await _unitOfWork.UserRepository.GetByIdAsync(id);
-            _unitOfWork.Commit();
-            return user;
+            var user = await _userService.GetUserByIdAsync(id);
+            return user is null ? NotFound() : Ok(user);
         }
 
         [HttpPost]
-        public async Task Create([FromBody] User user)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserReadDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<UserReadDto>> Create([FromBody] UserCreateDto user)
         {
-            await _unitOfWork.UserRepository.CreateAsync(user);
-            _unitOfWork.Commit();
+            if (user.BirthDate > DateTime.Now)
+            {
+                return BadRequest();
+            }
+
+            var created =  await _userService.CreateUserAsync(user);
+            return CreatedAtAction(nameof(Create), created);
         }
 
-        [HttpPut]
-        public async Task Update([FromBody] User user)
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReadDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        public async Task<ActionResult<UserReadDto>> Update([FromRoute] int id,[FromBody] UserUpdateDto user)
         {
-            await _unitOfWork.UserRepository.UpdateAsync(user);
-            _unitOfWork.Commit();
+            try
+            {
+                var updated = await _userService.UpdateUserAsync(id, user);
+                if (updated is null)
+                {
+                    return NotFound();
+                }
+
+                return CreatedAtAction(nameof(Update), updated);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete([FromRoute]int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Delete([FromRoute] int id)
         {
-            await _unitOfWork.UserRepository.DeleteAsync(id);
+            var isDeleted = await _userService.DeleteUserAsync(id);
+            if (isDeleted)
+            {
+                return NoContent();
+            }
+            return NotFound();
+        }
+
+        [HttpGet("with-projects")]
+        public async Task<IEnumerable<UserWithProjectsDTO>> GetUsersWithProjects()
+        {
+            var res = await _unitOfWork.UserRepository.GetUsersWithProjectsAsync();
             _unitOfWork.Commit();
+            
+            var values =  _mapper.Map<IEnumerable<User>, IEnumerable<UserWithProjectsDTO>>(res);
+            return values;
         }
     }
 }
