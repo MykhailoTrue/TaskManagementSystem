@@ -10,6 +10,6 @@ namespace TMS.Dapper.Common.DTOs.Users.Custom
         public string Email { get; set; }
         public DateTime? BirthDate { get; set; }
 
-        public IEnumerable<WorkspaceWithProjectsDTO> Workspaces { get; set; }
+        public List<WorkspaceWithProjectsDTO> Workspaces { get; set; }
     }
 }

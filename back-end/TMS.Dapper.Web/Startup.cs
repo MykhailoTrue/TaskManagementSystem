@@ -24,12 +24,12 @@ namespace TaskManagementSystem.Ado.Web
                     // set up content negotation
                     opts.RespectBrowserAcceptHeader = true;
                 })
-                .AddNewtonsoftJson()
                 .AddXmlSerializerFormatters()
                 .AddMvcOptions(opts =>
                 {
                     opts.OutputFormatters.Add(new CsvOutputFormatter());
-                });
+                })
+                .AddNewtonsoftJson();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();

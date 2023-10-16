@@ -10,6 +10,6 @@ namespace TMS.Dapper.Common.DTOs.Workspaces.Custom
         public string Title { get; set; }
         public string? Description { get; set; }
 
-        public IEnumerable<ProjectWithCategoryDTO> Projects { get; set; }
+        public List<ProjectWithCategoryDTO> Projects { get; set; }
     }
 }
