@@ -1,9 +1,0 @@
-﻿namespace TMS.Dapper.Common.DTOs.Projects.Custom
-{
-    public class ProjectWithCategoryDTO
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Category { get; set; }
-    }
-}

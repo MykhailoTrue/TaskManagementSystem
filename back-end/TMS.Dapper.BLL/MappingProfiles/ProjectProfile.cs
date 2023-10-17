@@ -9,8 +9,13 @@ namespace TMS.Dapper.BLL.MappingProfiles
     {
         public ProjectProfile()
         {
-            CreateMap<Project, ProjectReadDTO>();
-            CreateMap<Project, ProjectWithCategoryDTO>()
+            CreateMap<Project, ProjectReadDTO>()
+                .ForMember(p => p.Category, src => src.MapFrom(s => s.ProjectCategory != null ? s.ProjectCategory.Name : ""));
+
+            CreateMap<ProjectUpdateDTO, Project>();
+            CreateMap<ProjectCreateDTO, Project>();
+
+            CreateMap<Project, ProjectWithMembersDTO>()
                 .ForMember(p => p.Category, src => src.MapFrom(s => s.ProjectCategory != null ? s.ProjectCategory.Name : ""));
         }
     }

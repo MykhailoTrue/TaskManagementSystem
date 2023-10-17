@@ -48,6 +48,7 @@ namespace TMS.Dapper.Web.Extensions
         public static void RegisterCustomServices(this IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IProjectService, ProjectService>();
         }
 
         public static void RegisterMiddlewareFactory(this IServiceCollection services)

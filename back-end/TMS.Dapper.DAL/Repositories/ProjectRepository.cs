@@ -12,6 +12,41 @@ namespace TMS.Dapper.DAL.Repositories
         {
         }
 
+        public async Task<IEnumerable<Project>> GetAllWithCategoryAsync()
+        {
+            var query = "SELECT * FROM dbo.Projects p " +
+                "LEFT JOIN dbo.ProjectCategories pc ON p.ProjectCategoryId = pc.Id;";
+
+            var projects = await _connection.QueryAsync<Project, ProjectCategory, Project>(
+                query,
+                map: (p, pc) =>
+                {
+                    p.ProjectCategory = pc;
+                    return p;
+                },
+                transaction: _transaction);
+            return projects;
+        }
+
+        public async Task<Project?> GetByIdWithCategoryAsync(int id)
+        {
+            var query = "SELECT * FROM dbo.Projects p " +
+                "LEFT JOIN dbo.ProjectCategories pc ON p.ProjectCategoryId = pc.Id " +
+                "WHERE p.Id = @Id;";
+
+            var project = await _connection.QueryAsync<Project, ProjectCategory, Project>(
+                query,
+                map: (p, pc) =>
+                {
+                    p.ProjectCategory = pc;
+                    return p;
+                },
+                param: new {@Id = id},
+                transaction: _transaction);
+
+            return project.SingleOrDefault();
+        }
+
         public async Task<Project?> GetProjectWithMembersAsync(int id)
         {
             var query = @"SELECT 
@@ -20,8 +55,8 @@ namespace TMS.Dapper.DAL.Repositories
                         p.ProjectCategoryId,
 
                         pc.Id, 
-                        pc.Name AS ProjectCategoryName, 
-                        pc.Description AS ProjectCategoryDescription,
+                        pc.Name, 
+                        pc.Description,
 
                         u.Id, 
                         u.FirstName, 
@@ -32,12 +67,12 @@ namespace TMS.Dapper.DAL.Repositories
                         dbo.[Projects] p
                     LEFT JOIN 
                         ProjectCategories pc ON p.ProjectCategoryId = pc.Id
-                    INNER JOIN 
+                    LEFT JOIN 
                         ProjectMembers pm ON p.Id = pm.ProjectId
-                    INNER JOIN 
+                    LEFT JOIN 
                         Users u ON pm.MemberId = u.Id
                     WHERE 
-                        p.Id = 1;";
+                        p.Id = @Id;";
 
             Project? project = null;
             var projects = await _connection.QueryAsync<Project, ProjectCategory, User, Project>(
@@ -48,7 +83,11 @@ namespace TMS.Dapper.DAL.Repositories
                         project = p;
                         project.ProjectCategory = pc;
                     }
-                    project.Members.Add(u);
+
+                    if (u is not null)
+                    {
+                        project.Members.Add(u);
+                    }
 
                     return project;
                 },

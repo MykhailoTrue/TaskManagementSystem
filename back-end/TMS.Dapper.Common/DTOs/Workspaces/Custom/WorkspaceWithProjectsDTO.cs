@@ -1,4 +1,4 @@
-﻿using TMS.Dapper.Common.DTOs.Projects.Custom;
+﻿using TMS.Dapper.Common.DTOs.Projects.CRUD;
 
 namespace TMS.Dapper.Common.DTOs.Workspaces.Custom
 {
@@ -10,6 +10,6 @@ namespace TMS.Dapper.Common.DTOs.Workspaces.Custom
         public string Title { get; set; }
         public string? Description { get; set; }
 
-        public List<ProjectWithCategoryDTO> Projects { get; set; }
+        public List<ProjectReadDTO> Projects { get; set; }
     }
 }
