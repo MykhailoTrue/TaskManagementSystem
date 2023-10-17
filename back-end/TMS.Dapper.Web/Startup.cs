@@ -22,9 +22,9 @@ namespace TaskManagementSystem.Ado.Web
                 .AddControllers(opts =>
                 {
                     // set up content negotation
-                    opts.RespectBrowserAcceptHeader = true;
+                    //opts.RespectBrowserAcceptHeader = true;
                 })
-                .AddXmlSerializerFormatters()
+                //.AddXmlSerializerFormatters()
                 .AddMvcOptions(opts =>
                 {
                     opts.OutputFormatters.Add(new CsvOutputFormatter());
@@ -38,6 +38,7 @@ namespace TaskManagementSystem.Ado.Web
             services.RegisterUnitOfWork(_configuration);
             services.RegisterAutoMapper();
             services.RegisterCustomServices();
+
             services.RegisterMiddlewareFactory();
         }
 
