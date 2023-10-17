@@ -22,16 +22,7 @@ namespace TMS.Dapper.Web.Middleware
             }
             catch (SqlException sqlException)
             {
-                switch (sqlException.Number)
-                {
-                    case 208:
-                        await HandleExceptionAsync(context, sqlException, HttpStatusCode.BadRequest);
-                        break;
-
-                    default:
-                        await HandleExceptionAsync(context, sqlException);
-                        break;
-                }
+                await HandleExceptionAsync(context, sqlException, HttpStatusCode.BadRequest);
             }
             catch (CustomException ex)
             {
