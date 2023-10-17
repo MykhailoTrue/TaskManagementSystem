@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using Microsoft.Data.SqlClient;
+using System.Data;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
 namespace TMS.Dapper.DAL.Repositories
@@ -17,7 +18,7 @@ namespace TMS.Dapper.DAL.Repositories
             IWorkspaceRepository workspaceRepository,
             IProjectRepository projectRepository,
             IProjectCategoryRepository projectCategoryRepository,
-            IDbTransaction transaction)
+            SqlTransaction transaction)
         {
             UserRepository = userRepository;
             WorkspaceRepository = workspaceRepository;

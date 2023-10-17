@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
@@ -15,8 +16,8 @@ namespace TMS.Dapper.DAL.Repositories
         protected readonly IDbTransaction _transaction;
 
         public GenericRepository(
-            IDbConnection connection,
-            IDbTransaction transaction,
+            SqlConnection connection,
+            SqlTransaction transaction,
             string tableName)
         {
             _connection = connection;

@@ -16,12 +16,12 @@ namespace TMS.Dapper.Web.Extensions
             this IServiceCollection services, 
             IConfiguration configuration)
         {
-            services.AddScoped<IDbConnection>(sp =>
+            services.AddScoped(sp =>
                 new SqlConnection(configuration.GetConnectionString("TaskManagementSystem")));
 
             services.AddScoped(sp =>
             {
-                var connection = sp.GetRequiredService<IDbConnection>();
+                var connection = sp.GetRequiredService<SqlConnection>();
                 connection.Open();
                 return connection.BeginTransaction();
             });

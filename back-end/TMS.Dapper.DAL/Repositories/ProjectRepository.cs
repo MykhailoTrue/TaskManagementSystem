@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using System.Data;
+using Microsoft.Data.SqlClient;
 using TMS.Dapper.DAL.Entities;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
@@ -7,7 +7,7 @@ namespace TMS.Dapper.DAL.Repositories
 {
     public class ProjectRepository : GenericRepository<Project>, IProjectRepository
     {
-        public ProjectRepository(IDbConnection connection, IDbTransaction transaction) 
+        public ProjectRepository(SqlConnection connection, SqlTransaction transaction) 
             : base(connection, transaction, "Projects")
         {
         }
