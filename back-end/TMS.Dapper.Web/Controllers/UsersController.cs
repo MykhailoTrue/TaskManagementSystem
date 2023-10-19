@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TMS.Dapper.DAL.Entities;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using TMS.Dapper.BLL.Services.Abstract;
+using TMS.Dapper.Common.DTOs.Errors;
+using TMS.Dapper.Common.DTOs.Users.CRUD;
+using TMS.Dapper.Common.DTOs.Users.Custom;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
 namespace TMS.Dapper.Web.Controllers
@@ -8,48 +12,63 @@ namespace TMS.Dapper.Web.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserService _userService;
 
-        public UsersController(IUnitOfWork unitOfWork)
+        public UsersController(IUserService userService, IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;
+            _userService = userService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<User>> GetAll() 
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserReadDto>))]
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAll() 
         {
-            var users = await _unitOfWork.UserRepository.GetAllAsync();
-            _unitOfWork.Commit();
-            return users;
+            return Ok(await _userService.GetAllUsersAsync());
         }
 
         [HttpGet("{id}")]
-        public async Task<User> GetById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReadDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<UserReadDto>> GetById([FromRoute] int id)
         {
-            var user =  await _unitOfWork.UserRepository.GetByIdAsync(id);
-            _unitOfWork.Commit();
-            return user;
+            var user = await _userService.GetUserByIdAsync(id);
+            return user is null ? NotFound() : Ok(user);
         }
 
         [HttpPost]
-        public async Task Create([FromBody] User user)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserReadDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<UserReadDto>> Create([FromBody] UserCreateDto user)
         {
-            await _unitOfWork.UserRepository.CreateAsync(user);
-            _unitOfWork.Commit();
+            var created =  await _userService.CreateUserAsync(user);
+            return CreatedAtAction(nameof(Create), created);
         }
 
-        [HttpPut]
-        public async Task Update([FromBody] User user)
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReadDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<UserReadDto>> Update([FromRoute] int id,[FromBody] UserUpdateDto user)
         {
-            await _unitOfWork.UserRepository.UpdateAsync(user);
-            _unitOfWork.Commit();
+            var updated = await _userService.UpdateUserAsync(id, user);
+            return CreatedAtAction(nameof(Update), updated);
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete([FromRoute]int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult> Delete([FromRoute] int id)
         {
-            await _unitOfWork.UserRepository.DeleteAsync(id);
-            _unitOfWork.Commit();
+            await _userService.DeleteUserAsync(id);
+            return NoContent();
+        }
+
+        [HttpGet("projects")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserWithProjectsDTO))]
+        public async Task<ActionResult<IEnumerable<UserWithProjectsDTO>>> GetUsersWithProjects()
+        {
+            var users = await _userService.GetUsersWithProjectsAsync();
+            return Ok(users);
         }
     }
 }

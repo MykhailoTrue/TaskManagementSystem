@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TMS.Dapper.BLL.Services.Abstract;
+using TMS.Dapper.Common.DTOs.Errors;
+using TMS.Dapper.Common.DTOs.ProjectCategories.CRUD;
 using TMS.Dapper.DAL.Entities;
-using TMS.Dapper.DAL.Repositories;
-using TMS.Dapper.DAL.Repositories.Interfaces;
 
 namespace TMS.Dapper.Web.Controllers
 {
@@ -9,48 +10,58 @@ namespace TMS.Dapper.Web.Controllers
     [ApiController]
     public class ProjectCategoriesController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IProjectCategoryService _projectCategoryService;
 
-        public ProjectCategoriesController(IUnitOfWork unitOfWork)
+        public ProjectCategoriesController(IProjectCategoryService projectCategoryService)
         {
-            _unitOfWork = unitOfWork;
+            _projectCategoryService = projectCategoryService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ProjectCategory>> GetAll()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProjectCategoryReadDTO>))]
+        public async Task<ActionResult<IEnumerable<ProjectCategoryReadDTO>>> GetAll()
         {
-            var projectCategories = await _unitOfWork.ProjectCategoryRepository.GetAllAsync();
-            _unitOfWork.Commit();
-            return projectCategories;
+            var projectCategories = await _projectCategoryService.GetAllProjectCategoriesAsync();
+            return Ok(projectCategories);
         }
 
         [HttpGet("{id}")]
-        public async Task<ProjectCategory> GetById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProjectCategoryReadDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<ProjectCategory>> GetById([FromRoute] int id)
         {
-            var projectCategory = await _unitOfWork.ProjectCategoryRepository.GetByIdAsync(id);
-            _unitOfWork.Commit();
-            return projectCategory;
+            var projectCategory = await _projectCategoryService.GetProjectCategoryByIdAsync(id);
+            return Ok(projectCategory);
         }
 
         [HttpPost]
-        public async Task Create([FromBody] ProjectCategory projectCategory)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ProjectCategoryReadDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<ProjectCategoryReadDTO>> Create([FromBody] ProjectCategoryCreateDTO projectCategory)
         {
-            await _unitOfWork.ProjectCategoryRepository.CreateAsync(projectCategory);
-            _unitOfWork.Commit();
+            var created = await _projectCategoryService.CreateProjectCategoryAsync(projectCategory);
+
+            return CreatedAtAction(nameof(Create), created);
         }
 
-        [HttpPut]
-        public async Task Update([FromBody] ProjectCategory projectCategory)
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProjectCategoryReadDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<ProjectCategoryReadDTO>> Update([FromRoute] int id, [FromBody] ProjectCategoryUpdateDTO projectCategory)
         {
-            await _unitOfWork.ProjectCategoryRepository.UpdateAsync(projectCategory);
-            _unitOfWork.Commit();
+            var updated = await _projectCategoryService.UpdateProjectCategoryAsync(id, projectCategory);
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult> Delete([FromRoute] int id)
         {
-            await _unitOfWork.ProjectCategoryRepository.DeleteAsync(id);
-            _unitOfWork.Commit();
+            await _projectCategoryService.DeleteProjectCategoryAsync(id);
+            return NoContent();
         }
     }
 }

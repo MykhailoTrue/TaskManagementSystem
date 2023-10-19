@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dapper", "Dapper", "{14D140
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMS.Dapper.DAL", "TMS.Dapper.DAL\TMS.Dapper.DAL.csproj", "{E3DBED52-A4B8-4B9C-9954-CFD7C7C16927}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMS.Dapper.BLL", "TMS.Dapper.BLL\TMS.Dapper.BLL.csproj", "{6193897C-E30C-42B2-A2F9-FB76A06604A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMS.Dapper.Common", "TMS.Dapper.Common\TMS.Dapper.Common.csproj", "{CEE3EF3A-A897-4E7E-A3EA-6E06D78A1AA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,14 @@ Global
 		{E3DBED52-A4B8-4B9C-9954-CFD7C7C16927}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3DBED52-A4B8-4B9C-9954-CFD7C7C16927}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3DBED52-A4B8-4B9C-9954-CFD7C7C16927}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6193897C-E30C-42B2-A2F9-FB76A06604A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6193897C-E30C-42B2-A2F9-FB76A06604A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6193897C-E30C-42B2-A2F9-FB76A06604A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6193897C-E30C-42B2-A2F9-FB76A06604A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEE3EF3A-A897-4E7E-A3EA-6E06D78A1AA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEE3EF3A-A897-4E7E-A3EA-6E06D78A1AA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEE3EF3A-A897-4E7E-A3EA-6E06D78A1AA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEE3EF3A-A897-4E7E-A3EA-6E06D78A1AA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +42,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{8AB70F13-582A-4096-844E-852F6685C1F4} = {14D14017-3716-4CF1-A5C3-D5A780214F4F}
 		{E3DBED52-A4B8-4B9C-9954-CFD7C7C16927} = {14D14017-3716-4CF1-A5C3-D5A780214F4F}
+		{6193897C-E30C-42B2-A2F9-FB76A06604A9} = {14D14017-3716-4CF1-A5C3-D5A780214F4F}
+		{CEE3EF3A-A897-4E7E-A3EA-6E06D78A1AA5} = {14D14017-3716-4CF1-A5C3-D5A780214F4F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {55C063EC-462C-453A-AB42-6678C6AAC473}

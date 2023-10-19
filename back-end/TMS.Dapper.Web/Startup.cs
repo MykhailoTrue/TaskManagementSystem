@@ -1,6 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
-using System.Data;
+﻿using TMS.Dapper.BLL.MappingProfiles;
 using TMS.Dapper.Web.Extensions;
+using TMS.Dapper.Web.Formatters;
+using TMS.Dapper.Web.Middleware;
 
 namespace TaskManagementSystem.Ado.Web
 {
@@ -17,16 +18,34 @@ namespace TaskManagementSystem.Ado.Web
         {
             // Add services to the container.
 
-            services.AddControllers();
+            services
+                .AddControllers(opts =>
+                {
+                    // set up content negotation
+                    //opts.RespectBrowserAcceptHeader = true;
+                })
+                //.AddXmlSerializerFormatters()
+                .AddMvcOptions(opts =>
+                {
+                    opts.OutputFormatters.Add(new CsvOutputFormatter());
+                })
+                .AddNewtonsoftJson();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
             services.RegisterUnitOfWork(_configuration);
+            services.RegisterAutoMapper();
+            services.RegisterCustomServices();
+
+            services.RegisterMiddlewareFactory();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseExceptionHandlingMiddleware();
+
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
             {
@@ -41,6 +60,7 @@ namespace TaskManagementSystem.Ado.Web
             app.UseAuthorization();
 
             app.UseEndpoints(app => app.MapControllers());
+
         }
     }
 }

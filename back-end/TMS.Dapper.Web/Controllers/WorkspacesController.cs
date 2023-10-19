@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TMS.Dapper.DAL.Entities;
-using TMS.Dapper.DAL.Repositories;
-using TMS.Dapper.DAL.Repositories.Interfaces;
+using TMS.Dapper.BLL.Services.Abstract;
+using TMS.Dapper.Common.DTOs.Errors;
+using TMS.Dapper.Common.DTOs.Workspaces.CRUD;
+using TMS.Dapper.Common.DTOs.Workspaces.Custom;
 
 namespace TMS.Dapper.Web.Controllers
 {
@@ -9,48 +10,65 @@ namespace TMS.Dapper.Web.Controllers
     [ApiController]
     public class WorkspacesController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IWorkspaceService _workspaceService;
 
-        public WorkspacesController(IUnitOfWork unitOfWork)
+        public WorkspacesController(IWorkspaceService workspaceService)
         {
-            _unitOfWork = unitOfWork;
+            _workspaceService = workspaceService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Workspace>> GetAll()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<WorkspaceReadDTO>))]
+        public async Task<ActionResult<IEnumerable<WorkspaceReadDTO>>> GetAll()
         {
-            var workspaces = await _unitOfWork.WorkspaceRepository.GetAllAsync();
-            _unitOfWork.Commit();
-            return workspaces;
+            var workspaces = await _workspaceService.GetAllWorkspacesAsync();
+            return Ok(workspaces);
         }
 
         [HttpGet("{id}")]
-        public async Task<Workspace> GetById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceReadDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<WorkspaceReadDTO>> GetById([FromRoute] int id)
         {
-            var workspace = await _unitOfWork.WorkspaceRepository.GetByIdAsync(id);
-            _unitOfWork.Commit();
-            return workspace;
+            var workspace = await _workspaceService.GetWorkspaceByIdAsync(id);
+            return Ok(workspace);
         }
 
         [HttpPost]
-        public async Task Create([FromBody] Workspace workspace)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(WorkspaceReadDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<WorkspaceReadDTO>> Create([FromBody] WorkspaceCreateDTO workspace)
         {
-            await _unitOfWork.WorkspaceRepository.CreateAsync(workspace);
-            _unitOfWork.Commit();
+            var created = await _workspaceService.CreateWorkspaceAsync(workspace);
+            return CreatedAtAction(nameof(Create), created);
         }
 
-        [HttpPut]
-        public async Task Update([FromBody] Workspace workspace)
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceReadDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<WorkspaceReadDTO>> Update([FromRoute] int id, [FromBody] WorkspaceUpdateDTO workspace)
         {
-            await _unitOfWork.WorkspaceRepository.UpdateAsync(workspace);
-            _unitOfWork.Commit();
+            var updated = await _workspaceService.UpdateWorkspaceAsync(id, workspace);
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult> Delete([FromRoute] int id)
         {
-            await _unitOfWork.WorkspaceRepository.DeleteAsync(id);
-            _unitOfWork.Commit();
+            await _workspaceService.DeleteWorkspaceAsync(id);
+            return NoContent();
+        }
+
+        [HttpGet("{id}/projects")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceWithProjectsDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResultDTO))]
+        public async Task<ActionResult<WorkspaceWithProjectsDTO>> GetWorkspaceWithProjects([FromRoute] int id)
+        {
+            var workspace = await _workspaceService.GetWorkspaceWithProjectsAsync(id);
+            return Ok(workspace);
         }
     }
 }
