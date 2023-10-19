@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using System.Data;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 using TMS.Dapper.DAL.Repositories;
 using TMS.Dapper.BLL.MappingProfiles;
@@ -48,8 +47,9 @@ namespace TMS.Dapper.Web.Extensions
         public static void RegisterCustomServices(this IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IWorkspaceService, WorkspaceService>();
+            services.AddScoped<IProjectCategoryService, ProjectCategoryService>();
+            services.AddScoped<IProjectService, ProjectService>();
         }
 
         public static void RegisterMiddlewareFactory(this IServiceCollection services)

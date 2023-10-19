@@ -8,7 +8,10 @@ namespace TMS.Dapper.BLL.MappingProfiles
     {
         public ProjectCategoryProfile()
         {
-            CreateMap<ProjectCategory,  ProjectCategoryReadDto>();
+            CreateMap<ProjectCategory, ProjectCategoryReadDTO>();
+            CreateMap<ProjectCategoryCreateDTO, ProjectCategory>();
+            CreateMap<ProjectCategoryUpdateDTO, ProjectCategory>();
+
         }
     }
 }
