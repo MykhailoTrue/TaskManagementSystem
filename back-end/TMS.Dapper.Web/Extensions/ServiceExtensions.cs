@@ -49,6 +49,7 @@ namespace TMS.Dapper.Web.Extensions
         {
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IWorkspaceService, WorkspaceService>();
         }
 
         public static void RegisterMiddlewareFactory(this IServiceCollection services)

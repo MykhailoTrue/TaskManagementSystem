@@ -1,12 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
-using System.Data;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
 namespace TMS.Dapper.DAL.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly IDbTransaction _transaction;
+        private readonly SqlTransaction _transaction;
 
         public IUserRepository UserRepository { get; }
         public IWorkspaceRepository WorkspaceRepository { get; }

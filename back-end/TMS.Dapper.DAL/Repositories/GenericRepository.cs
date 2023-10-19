@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
 using System.Text;
+using TMS.Dapper.Common.Attributes;
 using TMS.Dapper.DAL.Entities.Abstract;
 using TMS.Dapper.DAL.Repositories.Interfaces;
 
@@ -12,8 +13,8 @@ namespace TMS.Dapper.DAL.Repositories
     public abstract class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
         protected readonly string _tableName;
-        protected readonly IDbConnection _connection;
-        protected readonly IDbTransaction _transaction;
+        protected readonly SqlConnection _connection;
+        protected readonly SqlTransaction _transaction;
 
         public GenericRepository(
             SqlConnection connection,
@@ -109,7 +110,7 @@ namespace TMS.Dapper.DAL.Repositories
         {
             var updateQuery = new StringBuilder($"UPDATE dbo.[{_tableName}] SET ");
 
-            var properties = GetEntityProperties();
+            var properties = GetUpdateEntityProperties();
             properties.Remove("Id");
             
             properties.ForEach(p => updateQuery.Append($"[{p}]=@{p}, "));
@@ -118,18 +119,6 @@ namespace TMS.Dapper.DAL.Repositories
                 .Append(" WHERE Id=@Id"); ;
 
             return updateQuery.ToString();
-        }
-
-        private static string GetTableName()
-        {
-            var type = typeof(T);
-            var tableAttr = type.GetCustomAttribute<TableAttribute>(true);
-            if (tableAttr != null)
-            {
-                return tableAttr.Name;
-            }
-
-            return $"{type.Name}s";
         }
 
         private string GenerateInsertQuery()
@@ -151,6 +140,20 @@ namespace TMS.Dapper.DAL.Repositories
 
             return insertQuery.ToString();
         }
+
+        private static List<string> GetUpdateEntityProperties()
+        {
+            var prop = typeof(T).GetProperties();
+            return prop
+                .Where(p =>
+                {
+                    var notMappedAttributes = p.GetCustomAttributes(typeof(NotMappedAttribute), true);
+                    var notUpdateAttributes = p.GetCustomAttributes(typeof(IgnoreUpdateAttribute), true);
+                    return notMappedAttributes.Length <= 0 && notUpdateAttributes.Length <= 0;
+                })
+                .Select(p => p.Name)
+                .ToList();
+        }
         private static List<string> GetEntityProperties()
         {
             var prop = typeof(T).GetProperties();
@@ -162,6 +165,18 @@ namespace TMS.Dapper.DAL.Repositories
                 })
                 .Select(p => p.Name)
                 .ToList();
+        }
+
+        private static string GetTableName()
+        {
+            var type = typeof(T);
+            var tableAttr = type.GetCustomAttribute<TableAttribute>(true);
+            if (tableAttr != null)
+            {
+                return tableAttr.Name;
+            }
+
+            return $"{type.Name}s";
         }
     }
 }
