@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TMS.EF.NTier.Common\TMS.EF.NTier.Common.csproj" />
+    <ProjectReference Include="..\TMS.EF.NTier.DAL\TMS.EF.NTier.DAL.csproj" />
+  </ItemGroup>
+
 </Project>
