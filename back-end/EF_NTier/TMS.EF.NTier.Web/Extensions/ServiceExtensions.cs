@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TMS.EF.NTier.DAL;
+using TMS.EF.NTier.DAL.Context;
 
 namespace TMS.EF.NTier.Web.Extensions
 {

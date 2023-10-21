@@ -1,4 +1,6 @@
-﻿using TMS.EF.NTier.Web.Extensions;
+﻿using Microsoft.EntityFrameworkCore;
+using TMS.EF.NTier.DAL.Context;
+using TMS.EF.NTier.Web.Extensions;
 
 namespace TMS.EF.NTier.Web
 {
@@ -43,6 +45,17 @@ namespace TMS.EF.NTier.Web
             app.UseAuthorization();
 
             app.UseEndpoints(endpoint => endpoint.MapControllers());
+
+            InitializeDb(app);
+        }
+
+        private static void InitializeDb(IApplicationBuilder app)
+        {
+            using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                using var context = scope.ServiceProvider.GetRequiredService<TaskManagementSystemDbContext>();
+                //context.Database.Migrate();
+            }
         }
     }
 }

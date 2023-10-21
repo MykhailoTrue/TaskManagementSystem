@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TMS.EF.NTier.DAL;
+using TMS.EF.NTier.DAL.Context;
 using TMS.EF.NTier.DAL.Entities;
 
 namespace TMS.EF.NTier.Web.Controllers
