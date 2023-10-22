@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using TMS.EF.NTier.Common.DTO.Users;
+using TMS.EF.NTier.DAL.Configuration;
 using TMS.EF.NTier.DAL.Entities;
 
 namespace TMS.EF.NTier.DAL.Context
@@ -21,52 +22,13 @@ namespace TMS.EF.NTier.DAL.Context
         private const int ENTITY_COUNT = 10;
         public static void Configure(this ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Issue>(entity =>
-            {
-                // can't configure without principal entity
-                /*entity.HasOne(d => d.Asignee).WithMany(p => p.Issues)
-                    .HasForeignKey(d => d.AsigneeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Issues_To_Users_AsigneeId");*/
+            modelBuilder.ApplyConfiguration<Project>(new ProjectConfiguration());
 
-                entity.HasOne(d => d.IssueType).WithMany(p => p.Issues)
-                    .HasForeignKey(d => d.IssueTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Issues_To_IssueTypes");
+            modelBuilder.ApplyConfiguration<IssueType>(new IssueTypeConfiguration());
 
-                entity.HasOne(d => d.ProjectColumn).WithMany(p => p.Issues)
-                    .HasForeignKey(d => d.ProjectColumnId)
-                    .HasConstraintName("FK_Issues_To_ProjectColumns");
-            });
+            modelBuilder.ApplyConfiguration<ProjectColumn>(new ProjectColumnConfiguration());
 
-            modelBuilder.Entity<IssueType>(entity =>
-            {
-                entity.HasOne(d => d.Project).WithMany(p => p.IssueTypes)
-                    .HasForeignKey(d => d.ProjectId)
-                    .HasConstraintName("FK_IssueTypes_To_Projects");
-            });
-
-            modelBuilder.Entity<Project>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("PK_Project_Id");
-
-                // can't configure without principal entity
-                /*entity.HasOne(d => d.ProjectCategory).WithMany(p => p.Projects)
-                    .HasForeignKey(d => d.ProjectCategoryId)
-                    .HasConstraintName("FK_Projects_To_Categories");*/
-
-                // can't configure without principal entity
-                /*entity.HasOne(d => d.Workspace).WithMany(p => p.Projects)
-                    .HasForeignKey(d => d.WorkspaceId)
-                    .HasConstraintName("FK_Projects_To_Workspaces");*/
-            });
-
-            modelBuilder.Entity<ProjectColumn>(entity =>
-            {
-                entity.HasOne(d => d.Project).WithMany(p => p.ProjectColumns)
-                    .HasForeignKey(d => d.ProjectId)
-                    .HasConstraintName("FK_ProjectColumns_To_Projects");
-            });
+            modelBuilder.ApplyConfiguration<Issue>(new IssueConfiguration());
         }
 
         public static void Seed(this ModelBuilder modelBuilder)
