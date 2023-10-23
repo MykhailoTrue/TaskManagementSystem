@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TMS.EF.NTier.DAL.Context;
+﻿using TMS.EF.NTier.DAL.Context;
 using TMS.EF.NTier.Web.Extensions;
+using TMS.EF.NTier.Web.Middleware;
 
 namespace TMS.EF.NTier.Web
 {
@@ -30,10 +30,14 @@ namespace TMS.EF.NTier.Web
             services.RegisterUnitOfWork(Configuration);
             services.RegisterCustomServices();
             services.RegisterAutomapper();
+
+            services.AddTransient<ExceptionMiddleware>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseExceptionHandlingMiddleware();
+
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
             {
