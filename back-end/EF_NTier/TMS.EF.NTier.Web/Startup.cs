@@ -27,7 +27,9 @@ namespace TMS.EF.NTier.Web
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
-            services.RegisterDbContext(Configuration);
+            services.RegisterUnitOfWork(Configuration);
+            services.RegisterCustomServices();
+            services.RegisterAutomapper();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
